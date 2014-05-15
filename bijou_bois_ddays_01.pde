@@ -21,8 +21,9 @@ int bufferSizeBig=bufferSizeSmall*fftRatio;
 PImage frame;
 
 import processing.pdf.*;
+import peasy.*;
 
-PFont font;
+PeasyCam cam;
 
 boolean gorecord = false;
 
@@ -34,9 +35,11 @@ float[][] getAvg = new float[n][m];
 
 void setup()
 {
-  size(512, 480);
-  height3 = height/3;
-  height23 = 2*height/3;
+  size(512, 480, P3D);
+
+  cam = new PeasyCam(this, 200);
+  cam.setMinimumDistance(50);
+  cam.setMaximumDistance(500);
 
   minim = new Minim(this);
 
@@ -78,24 +81,19 @@ void draw()
   
   //nextFrame();
   
-  spectrumScale = 3.4;  
+  spectrumScale = 1;  
      
   // perform a forward FFT on the samples in jingle's mix buffer
   // note that if jingle were a MONO file, this would be the same as using jingle.left or jingle.right
   fftLin.forward(in.mix);
   fftLog.forward(in.mix);
   
-  if (gorecord) {
-    beginRecord(PDF, "trace.pdf");
-  }
-  
   // draw the logarithmic averages
   {
     // since logarithmically spaced averages are not equally spaced
     // we can't precompute the width for all averages
     
-    stroke(0,110);
-    strokeWeight(1);
+    noStroke();
     noFill();
     
     translate(80, 0);
@@ -121,7 +119,7 @@ void draw()
                  
         xr[0][i] = (float)fftLog.freqToIndex(highFreq);
         
-        getAvg[0][i] = (getAvg[1][i] + fftLog.getAvg(i))  / 2;
+        getAvg[0][i] = ( 1*getAvg[1][i] + 3*fftLog.getAvg(i) )  / 4;
         
       }
    
@@ -138,17 +136,35 @@ void draw()
     goDraw();
 
   }
-  
-  if (gorecord) {
-    endRecord();
-    gorecord = false;
    
-  }
-    
 }
 
 void mouseReleased() {
-   gorecord = true; 
+   
+    PGraphics pdf = createGraphics(300, 300, PDF, "output.pdf");
+    pdf.beginDraw();
+    
+
+   for(int j=0; j<n; j++){      
+     
+    pdf.beginShape();
+    pdf.vertex( 0, 0);
+     
+    for(int i = 0; i < 16; i++)
+    {     
+      pdf.vertex( xr[j][i] * 2, getAvg[j][i] * spectrumScale);
+    }
+    
+    pdf.vertex( 362, 0);
+    pdf.endShape(CLOSE);
+     pdf.translate(0,160);
+
+   }
+   
+    
+    pdf.dispose();
+    pdf.endDraw();
+
 }
 
 void nextFrame() {
@@ -169,17 +185,17 @@ void goDraw() {
    for(int j=0; j<n; j++){      
 
     noFill();
-    fill( 0, 0, 0, 255 - (j*50) );
+    fill( 0, 0, 0, 114 - (j*96) );
     beginShape();
-    vertex( 0, 0 );
+    vertex( 0, 0, 0 );
  
     for(int i = 0; i < 16; i++)
     {     
-      vertex( xr[j][i] * 2, getAvg[j][i] * spectrumScale );
+      vertex( xr[j][i] * 2, getAvg[j][i] * spectrumScale, 0 );
       
     }
 
-    vertex( 362, 0);
+    vertex( 362, 0, 0);
     endShape(CLOSE);
 
   }
