@@ -27,7 +27,7 @@ PeasyCam cam;
 
 boolean gorecord = false;
 
-int n = 8;
+int n = 80;
 int m = 16;
 float[][] xr = new float[n][m]; 
 float[][] getAvg = new float[n][m];
@@ -35,7 +35,7 @@ float[][] getAvg = new float[n][m];
 
 void setup()
 {
-  size(512, 480, P3D);
+  size(1200, 800, P3D);
 
   cam = new PeasyCam(this, 300);
   cam.setMinimumDistance(50);
@@ -141,11 +141,11 @@ void draw()
 
 void mouseReleased() {
    
-    PGraphics pdf = createGraphics(300, 300, PDF, "output.pdf");
+    PGraphics pdf = createGraphics(600, 3000, PDF, "output.pdf");
     pdf.beginDraw();
     
 
-   for(int j=0; j<n; j++){      
+   for(int j=0; j<n; j+=5){      
      
     pdf.beginShape();
     pdf.vertex( 0, 0);
@@ -195,7 +195,7 @@ void goDraw() {
       
     }
 
-    translate(0,0,-5);
+    translate(0,0,-1);
     
     vertex( 362, 0, 0);
     endShape(CLOSE);
