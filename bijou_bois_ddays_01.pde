@@ -31,7 +31,7 @@ int m = 16;
 float[][] xr = new float[n][m]; 
 float[][] getAvg = new float[n][m];
 
-int largeurMotif = 30;
+int largeurMotif = 300;
 
 void setup()
 {
@@ -39,7 +39,7 @@ void setup()
 
   cam = new PeasyCam(this, -largeurMotif);
   cam.setMinimumDistance(50);
-  cam.setMaximumDistance(150);
+  cam.setMaximumDistance(350);
 
   minim = new Minim(this);
 
