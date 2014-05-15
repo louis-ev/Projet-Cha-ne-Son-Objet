@@ -37,7 +37,7 @@ void setup()
 {
   size(512, 480, P3D);
 
-  cam = new PeasyCam(this, 200);
+  cam = new PeasyCam(this, 300);
   cam.setMinimumDistance(50);
   cam.setMaximumDistance(500);
 
@@ -119,7 +119,7 @@ void draw()
                  
         xr[0][i] = (float)fftLog.freqToIndex(highFreq);
         
-        getAvg[0][i] = ( 1*getAvg[1][i] + 3*fftLog.getAvg(i) )  / 4;
+        getAvg[0][i] = ( 9*getAvg[1][i] + 1*fftLog.getAvg(i) )  / 10;
         
       }
    
@@ -180,12 +180,12 @@ void nextFrame() {
 void goDraw() {
   
   pushMatrix();
-  translate(0, height/4);
+  translate(-width/2, 0);
   
    for(int j=0; j<n; j++){      
 
     noFill();
-    fill( 0, 0, 0, 114 - (j*96) );
+    fill( 0, 0, 0, map(j, 0,n,0,255) );
     beginShape();
     vertex( 0, 0, 0 );
  
@@ -195,6 +195,8 @@ void goDraw() {
       
     }
 
+    translate(0,0,-5);
+    
     vertex( 362, 0, 0);
     endShape(CLOSE);
 
