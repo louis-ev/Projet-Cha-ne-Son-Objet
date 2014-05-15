@@ -26,6 +26,12 @@ PFont font;
 
 boolean gorecord = false;
 
+int n = 8;
+int m = 16;
+float[][] xr = new float[n][m]; 
+float[][] getAvg = new float[n][m];
+
+
 void setup()
 {
   size(512, 480);
@@ -50,28 +56,30 @@ void setup()
 
   strokeJoin(BEVEL);  
   rectMode(CORNERS);
-  font = createFont("Georgia", 32);
   background(241);
-  frameRate(30);
   stroke(255);
   noFill();
-  smooth();
-  
-  frame = get();
+
+  frameRate(60);
+    
+      for(int j=n-1; j>0; j--){
+        for(int i = 0; i < m; i++) {
+          xr[j][i] = 0;
+          getAvg[j][i] = 0; 
+        }
+      }
+
 }
 
 void draw()
 {
 
-  nextFrame();
+  background(255);
+  
+  //nextFrame();
   
   spectrumScale = 3.4;  
-  
-  textFont(font);
-  textSize( 18 );
- 
-  float centerFrequency = 0;
-  
+     
   // perform a forward FFT on the samples in jingle's mix buffer
   // note that if jingle were a MONO file, this would be the same as using jingle.left or jingle.right
   fftLin.forward(in.mix);
@@ -92,51 +100,43 @@ void draw()
     
     translate(80, 0);
     
-         
-
     stroke(50);
-         
-            
-    for (int j = 0; j < 2; j++) {
  
-      stroke( j * 50);
-      beginShape();
-  
-      vertex( 0, height/2 );
-  
-      float fftLogPrecedent = 0;
-      
-      for(int i = 0; i < 16; i++)
-      {
-        centerFrequency = fftLog.getAverageCenterFrequency(i);
-        // how wide is this average in Hz?
-        float averageWidth = fftLog.getAverageBandWidth(i);   
+    if ( fftLog.getAvg(0) != getAvg[0][0] ) {
         
-        // we calculate the lowest and highest frequencies
-        // contained in this average using the center frequency
-        // and bandwidth of this average.
+      for(int j=n-1; j>0; j--){
+        for(int i = 0; i < m; i++) {
+          xr[j][i] = xr[j-1][i];
+          getAvg[j][i] = getAvg[j-1][i]; 
+        }
+      }
+      
+      for(int i = 0; i < m; i++) {
+    
+        float centerFrequency = fftLog.getAverageCenterFrequency(i);
+        float averageWidth = fftLog.getAverageBandWidth(i);
+        
         float lowFreq  = centerFrequency - averageWidth/2;
         float highFreq = centerFrequency + averageWidth/2;
+                 
+        xr[0][i] = (float)fftLog.freqToIndex(highFreq);
         
-        // freqToIndex converts a frequency in Hz to a spectrum band index
-        // that can be passed to getBand. in this case, we simply use the 
-        // index as coordinates for the rectangle we draw to represent
-        // the average.
-        int xl = (int)fftLog.freqToIndex(lowFreq);
-        int xr = (int)fftLog.freqToIndex(highFreq);
-     
-        // draw a rectangle for each average, multiply the value by spectrumScale so we can see it better
-          vertex( xr*2, height/2 + fftLog.getAvg(i)*spectrumScale );
+        getAvg[0][i] = (getAvg[1][i] + fftLog.getAvg(i))  / 2;
         
-        fftLogPrecedent = fftLog.getAvg(i);
-        //rect( xl, height, xr, height - fftLog.getAvg(i)*spectrumScale );
-   
       }
-  
-      vertex( 362, height/2 );
-      endShape(CLOSE);
+   
+      for(int j=0; j<n; j++){      
+        for(int i = 0; i < m; i++) {
+          //print( "getAvg[" + j + "]" + "[" + i + "]" + getAvg[j][i] );
+        }
+      } 
+                
+    } else {
+       println("none"); 
     }
-    
+
+    goDraw();
+
   }
   
   if (gorecord) {
@@ -159,4 +159,30 @@ void nextFrame() {
   popMatrix();
   frame = get();
   
+}
+
+void goDraw() {
+  
+  pushMatrix();
+  translate(0, height/4);
+  
+   for(int j=0; j<n; j++){      
+
+    noFill();
+    fill( 0, 0, 0, 255 - (j*50) );
+    beginShape();
+    vertex( 0, 0 );
+ 
+    for(int i = 0; i < 16; i++)
+    {     
+      vertex( xr[j][i] * 2, getAvg[j][i] * spectrumScale );
+      
+    }
+
+    vertex( 362, 0);
+    endShape(CLOSE);
+
+  }
+ 
+ popMatrix();
 }
