@@ -3,6 +3,7 @@
 
 import ddf.minim.analysis.*;
 import ddf.minim.*;
+import java.util.*;
 
 Minim minim;  
 AudioInput in;
@@ -10,8 +11,6 @@ AudioInput in2;
 FFT fftLin;
 FFT fftLog;
 
-float height3;
-float height23;
 float spectrumScale = .1;
 
 int bufferSizeSmall=512;
@@ -32,14 +31,15 @@ int m = 16;
 float[][] xr = new float[n][m]; 
 float[][] getAvg = new float[n][m];
 
+int largeurMotif = 30;
 
 void setup()
 {
   size(1200, 800, P3D);
 
-  cam = new PeasyCam(this, 300);
+  cam = new PeasyCam(this, -largeurMotif);
   cam.setMinimumDistance(50);
-  cam.setMaximumDistance(500);
+  cam.setMaximumDistance(150);
 
   minim = new Minim(this);
 
@@ -65,12 +65,12 @@ void setup()
 
   frameRate(60);
     
-      for(int j=n-1; j>0; j--){
-        for(int i = 0; i < m; i++) {
-          xr[j][i] = 0;
-          getAvg[j][i] = 0; 
-        }
-      }
+  for(int j=n-1; j>0; j--){
+    for(int i = 0; i < m; i++) {
+      xr[j][i] = 0;
+      getAvg[j][i] = 0; 
+    }
+  }
 
 }
 
@@ -96,7 +96,7 @@ void draw()
     noStroke();
     noFill();
     
-    translate(80, 0);
+    translate(0, 0);
     
     stroke(50);
  
@@ -136,35 +136,47 @@ void draw()
     goDraw();
 
   }
+  
+  if (keyPressed) {
+    if ( key == 'p' ) {
+      saveFrame("output/frames####.png");
+    }
+  }
+
    
 }
 
-void mouseReleased() {
-   
-    PGraphics pdf = createGraphics(600, 3000, PDF, "output.pdf");
+void keyPressed() {
+     
+  if (key == 's' || key == 'S') {
+    Date d = new Date();
+    long current=d.getTime()/1000;
+  
+    PGraphics pdf = createGraphics(largeurMotif + 20, 3000, PDF, "output-" + current + ".pdf");
     pdf.beginDraw();
     
-
-   for(int j=0; j<n; j+=5){      
-     
-    pdf.beginShape();
-    pdf.vertex( 0, 0);
-     
-    for(int i = 0; i < 16; i++)
-    {     
-      pdf.vertex( xr[j][i] * 2, getAvg[j][i] * spectrumScale);
+    pdf.translate(10,10);
+    
+    for(int j=0; j<n; j+=5){      
+       
+      pdf.beginShape();
+      pdf.vertex( 0, 0);
+       
+      for(int i = 0; i < m; i++)
+      {
+        pdf.vertex( xr[j][i], getAvg[j][i] * spectrumScale);
+      }
+      
+      pdf.vertex( largeurMotif, 0);
+      pdf.endShape(CLOSE);
+      pdf.translate(0,160);
+  
     }
-    
-    pdf.vertex( 362, 0);
-    pdf.endShape(CLOSE);
-     pdf.translate(0,160);
-
-   }
-   
-    
+     
     pdf.dispose();
     pdf.endDraw();
-
+    
+  }
 }
 
 void nextFrame() {
@@ -180,7 +192,7 @@ void nextFrame() {
 void goDraw() {
   
   pushMatrix();
-  translate(-width/2, 0);
+  translate(0, 0, 0);
   
    for(int j=0; j<n; j++){      
 
@@ -189,15 +201,20 @@ void goDraw() {
     beginShape();
     vertex( 0, 0, 0 );
  
-    for(int i = 0; i < 16; i++)
-    {     
-      vertex( xr[j][i] * 2, getAvg[j][i] * spectrumScale, 0 );
+    // on supprime la dernière valeur
+    for(int i = 0; i < m-1; i++)
+    {           
+      int xpos = (int)((largeurMotif * xr[j][i]) / xr[j][m-1]);
       
+      //float xpos = map(xr[j][i], 0, xr[j][m-1], 0, largeurMotif);
+      vertex( xpos, getAvg[j][i] * spectrumScale, 0);
     }
+    
+    // et on lui met ,0,0 just because
+    vertex( largeurMotif, 0, 0);
 
     translate(0,0,-1);
     
-    vertex( 362, 0, 0);
     endShape(CLOSE);
 
   }
