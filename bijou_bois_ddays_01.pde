@@ -11,7 +11,7 @@ AudioInput in2;
 FFT fftLin;
 FFT fftLog;
 
-float spectrumScale = .1;
+float spectrumScale = 100;
 
 int bufferSizeSmall=512;
 int fftRatio=16; // how many times bigger is the big buffer for detailed analisis
@@ -81,7 +81,7 @@ void draw()
   
   //nextFrame();
   
-  spectrumScale = 1;  
+  spectrumScale = 5;  
      
   // perform a forward FFT on the samples in jingle's mix buffer
   // note that if jingle were a MONO file, this would be the same as using jingle.left or jingle.right
